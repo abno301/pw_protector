@@ -20,6 +20,7 @@ services:
     depends_on:
       - mongodb 
     environment:
+      ASPNETCORE_URLS: "http://0.0.0.0:5144"
       MONGO_URI: "mongodb://root:example@mongodb:27017"
       ASPNETCORE_ENVIRONMENT: "Development"
 
