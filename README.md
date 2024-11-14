@@ -11,7 +11,7 @@ docker compose down
 ### REST API:
 
 1. **Get all users passwords** 
-`POST` http://localhost:5144/password/jernejtest
+`POST` http://localhost:5144/password/jernejtest  
 **Request Body example:**
 ```json 
 {
@@ -21,7 +21,7 @@ docker compose down
 ```
 
 2. **Create user** 
-`POST` http://localhost:5144/masterPassword
+`POST` http://localhost:5144/masterPassword  
    **Request Body example:**
 ```json 
 {
@@ -31,7 +31,7 @@ docker compose down
 ```
 
 3. **Add password to user**
-`POST` http://localhost:5144/password/password
+`POST` http://localhost:5144/password/password  
    **Request Body example:**
 ```json 
 {
