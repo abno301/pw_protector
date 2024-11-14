@@ -31,7 +31,7 @@ docker compose down
 ```
 
 3. **Add password to user**
-`POST` http://localhost:5144/password/password  
+`POST` http://localhost:5144/password  
    **Request Body example:**
 ```json 
 {
