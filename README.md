@@ -7,6 +7,12 @@ docker compose up --build
 vgasnes:
 docker compose down
 
+### Mongo
+da se povezes na mongo (lokalno):  
+`mongosh --host localhost --port 27017 -u root -p example --authenticationDatabase admin`  
+izpis users:
+`db.users.find().pretty()`  
+
 
 ### REST API:
 
