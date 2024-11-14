@@ -1,23 +1,31 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
+using MyWebApiApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://0.0.0.0:5144");
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var mongoUri = Environment.GetEnvironmentVariable("MONGO_URI") ?? "mongodb://root:example@localhost:27017";
+
+// Register IMongoClient as a singleton
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoUri));
+
+
+builder.Services.AddSingleton<MasterPasswordService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -27,98 +35,115 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // set master password
-app.MapPost("/masterPassword", (PasswordsRequest masterPasswordRequest) => {
+app.MapPost("/masterPassword", async (PasswordsRequest masterPasswordRequest, MasterPasswordService masterService) => {
         Console.WriteLine(masterPasswordRequest.MasterPassword);
 
-        var masterService = new MasterPasswordService();
-         if (!masterService.VerifyMasterPassword(masterPasswordRequest.MasterPassword))
-         {
-             Console.WriteLine("Invalid password.");
-             return Results.BadRequest("invalid master password");         }
+        bool result = await masterService.SaveUserAsync(masterPasswordRequest.Username, masterPasswordRequest.MasterPassword);         
+        if (!result)
+        {
+            return Results.BadRequest("Invalid master password");
+        }
 
          Console.WriteLine("Password hash: " + masterService.MasterPasswordHash);
          
-         return Results.Ok(new { MasterPasswordHash = masterService.MasterPasswordHash });
-    })
+         return Results.Ok(new { Username = masterPasswordRequest.Username });    })
     .WithName("CreateMasterPassword")
     .WithOpenApi();
 
 // add password to password protector
-app.MapPost("/password", ([FromBody]CreatePasswordRequest request) => {
+app.MapPost("/password", async ([FromBody]CreatePasswordRequest request, IMongoClient mongoClient, MasterPasswordService masterService) => {
         Console.WriteLine(request);
 
-        var masterService = new MasterPasswordService();
-         if (!masterService.VerifyMasterPassword(request.MasterPassword))
-         {
-             Console.WriteLine("Invalid password.");
-             return Results.BadRequest("invalid master password");
-         }
-         
-         var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-         
-         var encrypted = encryptionService.Encrypt(request.Password);
+        if (!masterService.VerifyMasterPassword(request.MasterPassword))
+        {
+            Console.WriteLine("Invalid master password.");
+            return Results.BadRequest("Invalid master password");
+        }
 
-         Console.WriteLine("Encrypted: " + encrypted);
+        var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
+        var encrypted = encryptionService.Encrypt(request.Password);
 
+        Console.WriteLine("Encrypted: " + encrypted);
 
-         // var decrypted = encryptionService.Decrypt(encrypted);
-         //
-         // Console.WriteLine("Decrypted: " + decrypted);
-         
+        var database = mongoClient.GetDatabase("test"); // Use the actual database name
+        var usersCollection = database.GetCollection<User>("users");
+
+        var user = await usersCollection.Find(u => u.Username == request.Username).FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            Console.WriteLine("User not found.");
+            return Results.BadRequest("User not found");
+        }
+
+        user.Passwords.Add(new UserPassword(encrypted, request.Description));
+
+        var updateDefinition = Builders<User>.Update.Set(u => u.Passwords, user.Passwords);
+        await usersCollection.UpdateOneAsync(u => u.Username == request.Username, updateDefinition);
+
         return Results.Ok(new { Encrypted = encrypted });
     })
     .WithName("AddPassword")
     .WithOpenApi();
 
 // get all passwords from master password
-app.MapGet("/password", ([FromBody]PasswordsRequest request) => {
-        Console.WriteLine(request);
-
-        var masterService = new MasterPasswordService();
-         if (!masterService.VerifyMasterPassword(request.MasterPassword))
-         {
-             Console.WriteLine("Invalid password.");
-             return Results.BadRequest("invalid master password");
-         }
-         
-         var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-
-
-         // var decrypted = encryptionService.Decrypt(encrypted);
-         //
-         // Console.WriteLine("Decrypted: " + decrypted);
-         
-        return Results.Ok();
-    })
-    .WithName("GetAllPasswords")
-    .WithOpenApi();
+// app.MapGet("/password", ([FromBody]PasswordsRequest request) => {
+//         Console.WriteLine(request);
+//
+//         var masterService = new MasterPasswordService();
+//          if (!masterService.VerifyMasterPassword(request.MasterPassword))
+//          {
+//              Console.WriteLine("Invalid password.");
+//              return Results.BadRequest("invalid master password");
+//          }
+//          
+//          var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
+//
+//
+//          // var decrypted = encryptionService.Decrypt(encrypted);
+//          //
+//          // Console.WriteLine("Decrypted: " + decrypted);
+//          
+//         return Results.Ok();
+//     })
+//     .WithName("GetAllPasswords")
+//     .WithOpenApi();
 
 // get specific password
-app.MapGet("/password/{passwordId}", ([FromBody]PasswordsRequest request, string passwordId) => {
-        Console.WriteLine(request);
-
-        var masterService = new MasterPasswordService();
-        if (!masterService.VerifyMasterPassword(request.MasterPassword))
-        {
-            Console.WriteLine("Invalid password.");
-            return Results.BadRequest("invalid master password");
-        }
-         
-        var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-
-
-        // var decrypted = encryptionService.Decrypt(encrypted);
-        //
-        // Console.WriteLine("Decrypted: " + decrypted);
-         
-        return Results.Ok();
-    })
-    .WithName("GetPasswordById")
-    .WithOpenApi();
+// app.MapGet("/password/{passwordId}", ([FromBody]PasswordsRequest request, string passwordId) => {
+//         Console.WriteLine(request);
+//
+//         var masterService = new MasterPasswordService();
+//         if (!masterService.VerifyMasterPassword(request.MasterPassword))
+//         {
+//             Console.WriteLine("Invalid password.");
+//             return Results.BadRequest("invalid master password");
+//         }
+//          
+//         var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
+//
+//
+//         // var decrypted = encryptionService.Decrypt(encrypted);
+//         //
+//         // Console.WriteLine("Decrypted: " + decrypted);
+//          
+//         return Results.Ok();
+//     })
+//     .WithName("GetPasswordById")
+//     .WithOpenApi();
 
 
 app.Run();
 
-public record CreatePasswordRequest(string Password, string MasterPassword);
+public record CreatePasswordRequest(
+    string Username,
+    string MasterPassword,
+    string Password,
+    string Description
+);
+public record PasswordsRequest(string Username, string MasterPassword);
 
-public record PasswordsRequest(string MasterPassword);
+public record UserPassword(
+    string EncryptedPassword, // The encrypted password
+    string Description // A description for the password (optional)
+);
