@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -86,28 +87,29 @@ app.MapPost("/password", async ([FromBody]CreatePasswordRequest request, IMongoC
     .WithName("AddPassword")
     .WithOpenApi();
 
-// get all passwords from master password
-// app.MapGet("/password", ([FromBody]PasswordsRequest request) => {
-//         Console.WriteLine(request);
-//
-//         var masterService = new MasterPasswordService();
-//          if (!masterService.VerifyMasterPassword(request.MasterPassword))
-//          {
-//              Console.WriteLine("Invalid password.");
-//              return Results.BadRequest("invalid master password");
-//          }
-//          
-//          var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-//
-//
-//          // var decrypted = encryptionService.Decrypt(encrypted);
-//          //
-//          // Console.WriteLine("Decrypted: " + decrypted);
-//          
-//         return Results.Ok();
-//     })
-//     .WithName("GetAllPasswords")
-//     .WithOpenApi();
+// get all passwords from user master password
+app.MapPost("/password/{username}", async ([FromBody]PasswordsRequest request, MasterPasswordService masterService) => {
+        Console.WriteLine(request);
+        
+        var user = await masterService.GetUserAsync(request.Username);
+        if (user == null || !masterService.VerifyMasterPassword(request.MasterPassword))
+        {
+            Console.WriteLine("Invalid password.");
+            return Results.BadRequest("Invalid master password");
+        }
+
+        var userPasswords = user.Passwords;
+
+        // Zaenkrat dekriptiram preden posljem nazaj vse passworde
+        var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
+        var decryptedPasswords = userPasswords.Select(p => encryptionService.Decrypt(p.EncryptedPassword)).ToList();
+
+        Console.WriteLine("Decrypted Passwords: " + string.Join(", ", decryptedPasswords));
+
+        return Results.Ok(new { Passwords = decryptedPasswords });
+    })
+    .WithName("GetAllPasswords")
+    .WithOpenApi();
 
 // get specific password
 // app.MapGet("/password/{passwordId}", ([FromBody]PasswordsRequest request, string passwordId) => {
@@ -144,6 +146,6 @@ public record CreatePasswordRequest(
 public record PasswordsRequest(string Username, string MasterPassword);
 
 public record UserPassword(
-    string EncryptedPassword, // The encrypted password
-    string Description // A description for the password (optional)
+    string EncryptedPassword,
+    string Description
 );

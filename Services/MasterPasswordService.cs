@@ -11,12 +11,12 @@ public class MasterPasswordService
     private const string MasterPasswordHashFile = "master_hash.txt";
     public string MasterPasswordHash;
 
-    private readonly IMongoCollection<MasterPassword> _userCollection;
+    private readonly IMongoCollection<User> _userCollection;
 
     public MasterPasswordService(IMongoClient mongoClient)
     {
         var database = mongoClient.GetDatabase("test"); 
-        _userCollection = database.GetCollection<MasterPassword>("users");
+        _userCollection = database.GetCollection<User>("users");
     }
     
     public bool VerifyMasterPassword(string masterPassword)
@@ -68,7 +68,7 @@ public class MasterPasswordService
         }
 
         // Save to MongoDB
-        var user = new MasterPassword
+        var user = new User
         {
             Username = username,
             PasswordHash = passwordHash
@@ -77,6 +77,11 @@ public class MasterPasswordService
         
         Console.WriteLine("Username and password hash saved to MongoDB.");
         return true;
+    }
+    
+    public async Task<User> GetUserAsync(string username)
+    {
+        return await _userCollection.Find(u => u.Username == username).FirstOrDefaultAsync();
     }
 
     private string Hash(string input)
