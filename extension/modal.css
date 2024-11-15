@@ -1,0 +1,48 @@
+.modal-content {
+  position: absolute;
+  padding: 10px;
+  background-color: #fff;
+  color: #3e4b51;
+  border-radius: 8px;
+  width: 250px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  font-family: Arial, sans-serif;
+}
+
+.modal-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background-color: #eee;
+}
+
+.modal-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-email {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.modal-website {
+  font-size: 12px;
+  color: #c0c0c0;
+}
+
+.modal-option {
+  font-size: 13px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+.modal-option:hover {
+  text-decoration: underline;
+}
