@@ -44,9 +44,7 @@ app.MapPost("/masterPassword", async (PasswordsRequest masterPasswordRequest, Ma
         {
             return Results.BadRequest("Invalid master password");
         }
-
-         Console.WriteLine("Password hash: " + masterService.MasterPasswordHash);
-         
+        
          return Results.Ok(new { Username = masterPasswordRequest.Username });    })
     .WithName("CreateMasterPassword")
     .WithOpenApi();
@@ -90,7 +88,7 @@ app.MapPost("/password", async ([FromBody]CreatePasswordRequest request, IMongoC
 // get all passwords from user master password
 app.MapPost("/password/{username}", async ([FromBody]PasswordsRequest request, MasterPasswordService masterService) => {
         Console.WriteLine(request);
-        
+
         var user = await masterService.GetUserAsync(request.Username);
         if (user == null || !masterService.VerifyMasterPassword(request.MasterPassword))
         {
@@ -98,41 +96,44 @@ app.MapPost("/password/{username}", async ([FromBody]PasswordsRequest request, M
             return Results.BadRequest("Invalid master password");
         }
 
-        var userPasswords = user.Passwords;
-
-        // Zaenkrat dekriptiram preden posljem nazaj vse passworde
         var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-        var decryptedPasswords = userPasswords.Select(p => encryptionService.Decrypt(p.EncryptedPassword)).ToList();
 
-        Console.WriteLine("Decrypted Passwords: " + string.Join(", ", decryptedPasswords));
+        // Decrypt passwords and map to objects with password and description
+        var decryptedPasswords = user.Passwords.Select(p => new 
+        {
+            Password = encryptionService.Decrypt(p.EncryptedPassword),
+            Description = p.Description
+        }).ToList();
+
+        Console.WriteLine("Decrypted Passwords with Descriptions: ");
+        decryptedPasswords.ForEach(p => Console.WriteLine($"Password: {p.Password}, Description: {p.Description}"));
 
         return Results.Ok(new { Passwords = decryptedPasswords });
     })
     .WithName("GetAllPasswords")
     .WithOpenApi();
 
-// get specific password
-// app.MapGet("/password/{passwordId}", ([FromBody]PasswordsRequest request, string passwordId) => {
-//         Console.WriteLine(request);
-//
-//         var masterService = new MasterPasswordService();
-//         if (!masterService.VerifyMasterPassword(request.MasterPassword))
-//         {
-//             Console.WriteLine("Invalid password.");
-//             return Results.BadRequest("invalid master password");
-//         }
-//          
-//         var encryptionService = new EncryptionService(masterService.MasterPasswordHash);
-//
-//
-//         // var decrypted = encryptionService.Decrypt(encrypted);
-//         //
-//         // Console.WriteLine("Decrypted: " + decrypted);
-//          
-//         return Results.Ok();
-//     })
-//     .WithName("GetPasswordById")
-//     .WithOpenApi();
+// delete user and all their passwords
+app.MapDelete("/user/{username}", async (string username, IMongoClient mongoClient) =>
+    {
+        var database = mongoClient.GetDatabase("test"); // Use the actual database name
+        var usersCollection = database.GetCollection<User>("users");
+
+        // Attempt to delete the user
+        var deleteResult = await usersCollection.DeleteOneAsync(u => u.Username == username);
+
+        if (deleteResult.DeletedCount == 0)
+        {
+            Console.WriteLine($"User with username '{username}' not found.");
+            return Results.NotFound($"User with username '{username}' not found.");
+        }
+
+        Console.WriteLine($"User with username '{username}' successfully deleted.");
+        return Results.Ok($"User with username '{username}' successfully deleted.");
+    })
+    .WithName("DeleteUser")
+    .WithOpenApi();
+
 
 
 app.Run();
