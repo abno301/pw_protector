@@ -134,6 +134,38 @@ app.MapDelete("/user/{username}", async (string username, IMongoClient mongoClie
     .WithName("DeleteUser")
     .WithOpenApi();
 
+app.MapDelete("/user/password", async ([FromBody]DeletePasswordRequest request, IMongoClient mongoClient) =>
+    {
+        var database = mongoClient.GetDatabase("test"); // Use the actual database name
+        var usersCollection = database.GetCollection<User>("users");
+
+        var user = await usersCollection.Find(u => u.Username == request.Username).FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            Console.WriteLine($"User with username '{request.Username}' not found.");
+            return Results.NotFound($"User with username '{request.Username}' not found.");
+        }
+
+        var passwordToRemove = user.Passwords.FirstOrDefault(p => p.Description == request.Description);
+        if (passwordToRemove == null)
+        {
+            Console.WriteLine($"Password with description '{request.Description}' not found for user '{request.Username}'.");
+            return Results.NotFound($"Password with description '{request.Description}' not found.");
+        }
+
+        user.Passwords.Remove(passwordToRemove);
+
+        var updateDefinition = Builders<User>.Update.Set(u => u.Passwords, user.Passwords);
+        await usersCollection.UpdateOneAsync(u => u.Username == request.Username, updateDefinition);
+
+        Console.WriteLine($"Password with description '{request.Description}' removed for user '{request.Username}'.");
+        return Results.Ok($"Password with description '{request.Description}' successfully removed.");
+    })
+    .WithName("DeletePassword")
+    .WithOpenApi();
+
+
 
 app.MapPost("/login", async (PasswordsRequest request, MasterPasswordService masterService) =>
     {
@@ -180,3 +212,5 @@ public record UserPassword(
     string EncryptedPassword,
     string Description
 );
+
+public record DeletePasswordRequest(string Username, string Description);

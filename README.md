@@ -47,3 +47,29 @@ izpis users:
   "Description": "facebook"
 }
 ```
+
+4. **Delete user**
+   `DELETE` http://localhost:5144/delete/{username}
+
+5. **Login user**
+   `POST` http://localhost:5144/login  
+   **Request Body example:**
+```json 
+{
+  "Username": "jernejtest",
+  "MasterPassword": "mysecretpassword"
+}
+```
+
+6. **Delete user**
+`DELETE` http://localhost:5144/delete/{username}
+
+7. **Delete password from user**
+`POST` http://localhost:5144/user/password  
+**Request Body example:**
+```json 
+{
+   "Username": "jernejtest",
+   "Description": "facebook"
+}
+```
