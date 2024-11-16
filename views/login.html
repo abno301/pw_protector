@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager - Login</title>
+
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/custom.css">
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f0f0f0;
+        }
+        .title-wrapper {
+            text-align: center;
+            font-size: 2.5rem;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #000000, #006fcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 500px;
+        }
+        .file-upload-wrapper {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #fff;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        .file-upload-wrapper:hover {
+            background-color: #fafafa;
+        }
+        .login-button-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-modern {
+            background: linear-gradient(45deg, #d6ecff, #478ed1);
+            color: #2b2a2a;
+            padding: 13px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="title-wrapper">Password Protector</div>
+
+<div class="container">
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <span class="card-title center-align">Login with SSH Key</span>
+            <form id="login-form">
+                <div id="file-upload" class="file-upload-wrapper">
+                    <span class="material-icons large">vpn_key</span>
+                    <p>Drag & Drop your SSH Key here or click to select</p>
+                    <input type="file" id="sshKey" name="sshKey" style="display:none;">
+                </div>
+                <div class="login-button-wrapper">
+                    <button type="submit" id="login-button" class="btn-modern waves-effect waves-light">Login</button>
+                </div>
+            </form>
+            <p id="error-message" class="red-text"></p>
+        </div>
+    </div>
+</div>
+
+<script src="../src/renderer/login.js"></script>
+</body>
+</html>

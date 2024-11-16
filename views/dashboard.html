@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager - Dashboard</title>
+
+    <!-- Fonts and Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@600&display=swap">
+
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="../node_modules/materialize-css/dist/css/materialize.min.css">
+    <script src="../node_modules/materialize-css/dist/js/materialize.min.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .dashboard-container {
+            padding: 20px;
+        }
+        nav {
+            border-radius: 10px;
+        }
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+        .btn, .btn-flat {
+            border-radius: 24px;
+        }
+        #password-table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        .title-wrapper {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-left: 20px;
+            line-height: 56px;
+        }
+        .fab-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .navbar-modern {
+            background: linear-gradient(45deg, #3b8ad9, #00658e);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 12px 12px;
+        }
+        .btn-modern, .btn-logout {
+            color: #fff;
+            background-color: transparent;
+            border-radius: 20px;
+            padding: 0 16px;
+            margin: 0 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .btn-modern:hover, .btn-logout:hover {
+            background-color: rgb(0, 50, 94);
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Navigation bar -->
+    <nav class="navbar-modern">
+        <div class="nav-wrapper">
+            <span class="title-wrapper">Password Manager</span>
+            <ul id="nav-mobile" class="right">
+                <li><a id="backup-button" class="waves-effect waves-light btn-flat btn-modern"><i class="material-icons left">cloud_upload</i>Backup Passwords</a></li>
+                <li><a id="logout-button" class="waves-effect waves-light btn-flat btn-logout"><i class="material-icons left">exit_to_app</i>Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Password Table -->
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <span class="card-title">Saved Passwords</span>
+            <table id="password-table" class="highlight centered">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Password rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fab-button">
+    <a href="#add-password-modal" id="add-password-button" class="btn-floating btn-large blue lighten-1 modal-trigger">
+        <i class="material-icons">add</i>
+    </a>
+</div>
+
+<!-- Add Password Modal -->
+<div id="add-password-modal" class="modal">
+    <div class="modal-content">
+        <h4>Add New Password</h4>
+        <form id="add-password-form">
+            <div class="input-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button id="btnAddPass" type="submit" class="btn blue waves-effect waves-light">Add Password</button>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="modal-close btn-flat">Close</button>
+    </div>
+</div>
+
+<!-- Master Password Modal -->
+<div id="master-password-modal" class="modal">
+    <div class="modal-content">
+        <h4>Enter Master Password</h4>
+        <form id="master-password-form">
+            <div class="input-field">
+                <input type="password" id="master-password-input" required>
+                <label for="master-password-input">Master Password</label>
+            </div>
+            <button type="submit" class="btn blue waves-effect waves-light">Submit</button>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="modal-close btn-flat">Cancel</button>
+    </div>
+</div>
+
+<script src="../src/renderer/dashboard.js"></script>
+</body>
+</html>
