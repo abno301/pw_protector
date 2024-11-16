@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const { username, masterPassword } = message.payload;
       getUser(username, masterPassword)
         .then((passwords) => {
-          cachedCredentials = { username, masterPassword }; // Store credentials on successful login
+          cachedCredentials = { username, masterPassword };
           cachedPasswords = passwords;
 
           sendResponse(passwords);

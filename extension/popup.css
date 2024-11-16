@@ -1,11 +1,11 @@
-/* General styles for the popup */
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 10px;
   background-color: #f9f9f9;
   color: #333;
-  width: 250px; /* Adjusted for a compact view */
+  width: 250px; 
 }
 
 h1,
@@ -53,9 +53,9 @@ button:hover {
   background-color: #0056b3;
 }
 
-/* Styling for hidden Add Password section */
+
 #add-password-section {
-  display: none; /* Hidden by default */
+  display: none;
   margin-top: 15px;
 }
 
@@ -67,13 +67,13 @@ button:hover {
   background-color: #218838;
 }
 
-/* Response message styling */
+
 #response-message {
   margin-top: 10px;
   font-size: 12px;
-  color: #d9534f; /* Default to red for errors */
+  color: #d9534f; 
 }
 
 .success {
-  color: #28a745; /* Green for success messages */
+  color: #28a745; 
 }
