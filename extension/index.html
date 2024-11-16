@@ -2,11 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Popup</title>
+    <title>Password Manager</title>
+    <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>Fill username and password</h1>
-    <button id="show-modal-btn">Show Modal</button>
+    <h1>Password Manager</h1>
+    <div id="login-section">
+      <label for="username">Username:</label>
+      <input
+        type="text"
+        id="username"
+        placeholder="Enter your username"
+        required
+      />
+      <label for="password">Master Password:</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your master password"
+        required
+      />
+      <button id="login-btn">Login</button>
+    </div>
+
+    <p id="response-message"></p>
+
+    <div id="welcome-section" style="display: none">
+      <p>Hello, <span id="welcome-username"></span>!</p>
+      <button id="add-password-btn">Add Password</button>
+    </div>
+    <div id="add-password-section" style="display: none">
+      <label for="description">Description:</label>
+      <input type="text" id="description" placeholder="e.g., Gmail account" />
+      <label for="new-password">Password:</label>
+      <input type="password" id="new-password" placeholder="Enter password" />
+      <button id="confirm-add-password">Confirm</button>
+    </div>
+
     <script src="popup.js"></script>
   </body>
 </html>

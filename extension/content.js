@@ -159,12 +159,16 @@ async function main() {
   const loginFields = identifyLoginFields();
 
   if (loginFields.email || loginFields.username || loginFields.password) {
-    chrome.runtime.sendMessage({ action: "getUser" }, (user) => {
-      if (user) {
-        console.log("User data:", user);
-        showModalNearInputField(user);
+    chrome.runtime.sendMessage({ action: "getUserPassword" }, (response) => {
+      if (response.username && response.passwords) {
+        console.log("User data:", response);
+
+        showModalNearInputField({
+          username: response.username,
+          password: response.passwords[0],
+        });
       } else {
-        console.error("Failed to fetch user data.");
+        console.warn(response.error);
       }
     });
   }
