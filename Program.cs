@@ -135,6 +135,36 @@ app.MapDelete("/user/{username}", async (string username, IMongoClient mongoClie
     .WithOpenApi();
 
 
+app.MapPost("/login", async (PasswordsRequest request, MasterPasswordService masterService) =>
+    {
+        var user = await masterService.GetUserAsync(request.Username);
+        if (user != null)
+        {
+            // user obstaja
+            bool isPasswordCorrect = masterService.VerifyMasterPassword(request.MasterPassword);
+            if (isPasswordCorrect)
+            {
+                // pravilni password
+                return Results.Ok(new { Status = 1 }); 
+            }
+            else
+            {
+                // narobni master password
+                return Results.Ok(new { Status = 2 }); 
+            }
+        }
+        bool creationResult = await masterService.SaveUserAsync(request.Username, request.MasterPassword);
+        if (creationResult)
+        {
+            return Results.Ok(new { Status = 3 });
+        }
+        
+        return Results.BadRequest("Error creating user.");
+    })
+    .WithName("Login")
+    .WithOpenApi();
+
+
 
 app.Run();
 
