@@ -1,0 +1,21 @@
+sestanek o arhitekturi projekta
+
+Naredil shemo NOSQL dokumentne baze
+
+Z Dockerfilom potegnil image mongodb in se povezal gor lokalno ter kreiral par primerov entitet oz. objektov
+
+kreiral example web api app v .net, da sem testiral povezanost med serverjem in bazo preko kontejnerjev. 
+
+sestanek povezave kako bomo povezali logiko in api
+
+Razclenil logiko na vec servicov, kreiral endpointe na rest api-ju
+
+docker ni delal
+
+Povezava REST API-ija z MongoDB bazo
+
+
+Dodal Endpoint za login, delete password, delete user.
+
+
+Naredil README za backend
