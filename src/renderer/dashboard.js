@@ -100,15 +100,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         row.querySelector('.delete-password-button').addEventListener('click', function () {
-            const passwordId = this.dataset.id;
-            if (passwordId) {
-                fetch(`http://localhost:5000/api/passwords/${passwordId}`, {
+            const description = row.querySelector('td').textContent; // Get the description (first <td> in the row)
+            console.log('Attempting to delete password for:', description);
+
+            if (description && mUsername) {
+                fetch(`http://localhost:5144/user/password`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Username: mUsername, Description: description })
                 })
-                    .then((response) => response.json())
-                    .then(() => row.remove())
-                    .catch(() => alert('An error occurred while deleting the password.'));
+                    .then((response) => {
+                        if (response.ok) {
+                            console.log('Password deleted successfully');
+                            row.remove(); // Remove the row from the UI if deletion is successful
+                        } else {
+                            throw new Error('Failed to delete password');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('An error occurred while deleting the password:', error);
+                        alert('An error occurred while deleting the password.');
+                    });
             } else if (confirm('Are you sure you want to delete this password entry?')) {
                 row.remove();
             }
